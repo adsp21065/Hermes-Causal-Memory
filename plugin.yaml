@@ -1,14 +1,14 @@
-name: temporal-memory
-version: 0.1.0
+name: causal-memory
+version: 0.2.0
 manifest_version: 2
 api_version: 1
-description: Learns temporal and causal constraints from Hermes task traces.
+description: Learns evidence-backed causal candidates from Hermes task observations.
 license: MIT
-tags: [memory, temporal, experience, world-model]
+tags: [memory, causal, experience, world-model]
 provides_tools:
-  - temporal_check
-  - temporal_query
-  - temporal_record_event
+  - causal_check
+  - causal_query
+  - causal_record_observation
 provides_hooks:
   - post_tool_call
   - on_session_end
@@ -17,7 +17,7 @@ config_schema:
   auto_extract:
     type: bool
     default: false
-    description: Extract temporal rules after every completed session; incurs an LLM call.
+    description: Extract observations after every completed session; incurs an LLM call.
   max_trace_events:
     type: int
     default: 80

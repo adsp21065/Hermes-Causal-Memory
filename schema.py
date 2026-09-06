@@ -1,52 +1,43 @@
-"""Schemas for the Hermes temporal-memory plugin."""
+"""Schemas exposed by the Hermes causal-memory plugin."""
 
-TEMPORAL_DOCUMENT_SCHEMA = {
-    "type": "object",
-    "additionalProperties": False,
-    "required": ["task", "summary", "preconditions", "states", "events", "temporal_constraints", "failure_patterns"],
-    "properties": {
-        "task": {"type": "string"},
-        "summary": {"type": "string"},
-        "preconditions": {"type": "array", "items": {"type": "string"}},
-        "states": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": "string"}}},
-        "events": {"type": "array", "items": {"type": "object", "additionalProperties": False,
-            "required": ["name", "source"], "properties": {"name": {"type": "string"}, "source": {"type": "string"}}}},
-        "temporal_constraints": {"type": "array", "items": {"type": "object", "additionalProperties": False,
-            "required": ["type", "before", "after", "reason"], "properties": {
-                "type": {"type": "string", "enum": ["MUST_PRECEDE", "MUST_WAIT_FOR", "REQUIRES"]},
-                "before": {"type": "string"}, "after": {"type": "string"}, "reason": {"type": "string"}}}},
-        "failure_patterns": {"type": "array", "items": {"type": "object", "additionalProperties": False,
-            "required": ["condition", "result", "recovery"], "properties": {
-                "condition": {"type": "string"}, "result": {"type": "string"}, "recovery": {"type": "string"}}}},
-    },
-}
+OBSERVATION_SCHEMA = {
+    "type": "object", "additionalProperties": False, "required": ["task", "observations"],
+    "properties": {"task": {"type": "string"}, "observations": {"type": "array", "items": {
+        "type": "object", "additionalProperties": False,
+        "required": ["context", "causes", "actions", "effects", "outcome", "evidence"],
+        "properties": {"context": {"type": "array", "items": {"type": "string"}},
+            "causes": {"type": "array", "items": {"type": "string"}}, "actions": {"type": "array", "items": {"type": "string"}},
+            "effects": {"type": "array", "items": {"type": "string"}},
+            "outcome": {"type": "string", "enum": ["success", "failure", "unknown"]}, "evidence": {"type": "string"}}}}}}
 
-TEMPORAL_CHECK = {
-    "name": "temporal_check",
-    "description": "Check whether an action is allowed by learned temporal constraints. Use before an action whose ordering or prerequisite matters.",
+CAUSAL_CHECK = {
+    "name": "causal_check",
+    "description": "Check causal candidates before a planned action. Returns evidence-based warnings, never a hard block.",
     "parameters": {"type": "object", "properties": {
         "task": {"type": "string", "description": "Known task/workflow name."},
-        "action": {"type": "string", "description": "The action to validate."},
-        "current_states": {"type": "array", "items": {"type": "string"}, "description": "Facts currently true, e.g. scope.armed."},
-    }, "required": ["task", "action"]},
+        "planned_action": {"type": "string", "description": "Action about to be performed."},
+        "current_facts": {"type": "array", "items": {"type": "string"}, "description": "Facts currently true."},
+    }, "required": ["task", "planned_action"]},
 }
 
-TEMPORAL_QUERY = {
-    "name": "temporal_query",
-    "description": "Retrieve learned temporal rules, event ordering, and failures for a task or natural-language query.",
+CAUSAL_QUERY = {
+    "name": "causal_query",
+    "description": "Retrieve statistically supported causal candidates, conditions, and conditional probabilities.",
     "parameters": {"type": "object", "properties": {
         "query": {"type": "string", "description": "Task name or a concise workflow description."},
     }, "required": ["query"]},
 }
 
-TEMPORAL_RECORD_EVENT = {
-    "name": "temporal_record_event",
-    "description": "Record an observed event or state transition when a tool result alone does not expose it.",
+CAUSAL_RECORD_OBSERVATION = {
+    "name": "causal_record_observation",
+    "description": "Record a real-world state/action/result observation that tool output does not expose.",
     "parameters": {"type": "object", "properties": {
         "task": {"type": "string", "description": "Current task or workflow identifier."},
-        "event": {"type": "string", "description": "Observed event or action name."},
-        "source": {"type": "string", "description": "Agent, device, or subsystem that observed it."},
-        "state": {"type": "string", "description": "Optional state reached, e.g. scope.armed."},
-        "details": {"type": "string", "description": "Optional concise evidence."},
-    }, "required": ["task", "event", "source"]},
+        "context": {"type": "array", "items": {"type": "string"}},
+        "causes": {"type": "array", "items": {"type": "string"}},
+        "actions": {"type": "array", "items": {"type": "string"}},
+        "effects": {"type": "array", "items": {"type": "string"}},
+        "outcome": {"type": "string", "enum": ["success", "failure", "unknown"]},
+        "evidence": {"type": "string"},
+    }, "required": ["task", "actions", "effects", "outcome"]},
 }
